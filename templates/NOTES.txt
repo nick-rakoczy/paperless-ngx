@@ -1,0 +1,21 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your Paperless-ngx instance is now being deployed!
+
+Get the application URL by running these commands:
+{{- if contains "NodePort" .Values.webserver.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ .Release.Name }}-webserver)
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.webserver.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ .Release.Name }}-webserver'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ .Release.Name }}-webserver --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.webserver.service.port }}
+{{- else if contains "ClusterIP" .Values.webserver.service.type }}
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-webserver {{ .Values.webserver.service.port }}:{{ .Values.webserver.service.port }}
+  echo "Visit http://127.0.0.1:{{ .Values.webserver.service.port }} to access Paperless-ngx"
+{{- end }}
+
+For more information about Paperless-ngx, please visit:
+https://docs.paperless-ngx.com/

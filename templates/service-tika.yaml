@@ -1,0 +1,19 @@
+{{- if .Values.tika.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-tika
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-tika
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9998
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ .Release.Name }}-tika
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

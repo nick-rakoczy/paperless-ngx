@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-db
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-db
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    # Use this service for StatefulSet DNS-based discovery
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  # Headless service for StatefulSet stability
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - port: 5432
+      targetPort: postgres
+      protocol: TCP
+      name: postgres
+  selector:
+    app.kubernetes.io/name: {{ .Release.Name }}-db
+    app.kubernetes.io/instance: {{ .Release.Name }}

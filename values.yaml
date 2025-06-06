@@ -1,0 +1,118 @@
+# Default values for paperless-ngx
+
+webserver:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/paperless-ngx/paperless-ngx
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  # Additional environment variables for the webserver (beyond PAPERLESS_REDIS and PAPERLESS_DBHOST)
+  env:
+    # Example: PAPERLESS_TIME_ZONE: "UTC"
+    # Example: PAPERLESS_OCR_LANGUAGE: "eng"
+    # Tika and Gotenberg endpoints are configured automatically based on their enabled flags
+  # Secret environment variables configuration
+  envSecrets:
+    # Name of the secret to use (leave empty to disable)
+    secretName: ""
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - chart-example.local
+
+postgres:
+  image:
+    repository: docker.io/library/postgres
+    tag: "17"
+    pullPolicy: IfNotPresent
+  resources: {}
+  # Postgres StatefulSet specific configuration
+  podManagementPolicy: OrderedReady  # or Parallel
+  updateStrategy:
+    type: RollingUpdate
+  securityContext:
+    fsGroup: 999
+    runAsUser: 999
+  env:
+    POSTGRES_DB: paperless
+    POSTGRES_USER: paperless
+    POSTGRES_PASSWORD: paperless
+    # Additional postgres configuration
+    PGDATA: /var/lib/postgresql/data/postgres
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+
+redis:
+  image:
+    repository: docker.io/library/redis
+    tag: "7"
+    pullPolicy: IfNotPresent
+  resources: {}
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 1Gi
+
+tika:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: docker.io/apache/tika
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+gotenberg:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: docker.io/gotenberg/gotenberg
+    tag: "8.19"
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+persistence:
+  data:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+  media:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+  consume:
+    enabled: true
+    storageClass: ""
+    size: 1Gi
+  export:
+    enabled: true
+    storageClass: ""
+    size: 1Gi
